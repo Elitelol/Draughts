@@ -1,3 +1,5 @@
+package DataStructures;
+
 public class StrikingDraught {
     private Position playerDraught;
     private Position opponentDraught;

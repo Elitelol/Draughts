@@ -1,3 +1,5 @@
+package DataStructures;
+
 import java.util.ArrayList;
 
 public class Player {
@@ -23,24 +25,21 @@ public class Player {
         ArrayList<Draught> tempList = new ArrayList<>();
         int startingPos;
         int endingPos;
-        String mark;
 
         if(colour.equals("White")){
-            startingPos = 5;
+            startingPos = 6;
             endingPos = 8;
-            mark = "O";
         }
         else{
-            startingPos = 0;
+            startingPos = 1;
             endingPos = 3;
-            mark = "Q";
         }
 
-        for(int i = startingPos; i < endingPos; i++){
-            int puttingPosition = i % 2 == 0 ? 1 : 0;
+        for(int i = startingPos; i <= endingPos; i++){
+            int puttingPosition = i % 2 == 0 ? 1 : 2;
 
-            for(int j = puttingPosition; j < 8; j += 2){
-                tempList.add(new Draught(i, j, mark));
+            for(int j = puttingPosition; j <= 8; j += 2){
+                tempList.add(new Draught(i, j));
             }
         }
 
