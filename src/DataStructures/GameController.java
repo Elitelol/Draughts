@@ -4,12 +4,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
+import java.util.ArrayList;
+
 public class GameController {
     public StackPane stackPane;
     private Board board;
     private int turn;
     private int oldY, oldX;
     private int newY, newX;
+    private int strikeX, strikeY;
+    private int option;
     private boolean continuousStrike;
     private boolean ableToMove;
     private Player[] players;
@@ -26,6 +30,9 @@ public class GameController {
         oldX = 0;
         newY = 0;
         newX = 0;
+        strikeX = 0;
+        strikeY = 0;
+        option = 0;
         ableToMove = false;
     }
 
@@ -46,6 +53,34 @@ public class GameController {
     }
 
     public void moveDraught(MouseEvent mouseEvent) {
+        int option = 0;
+
+        gameMechanics.checkForCaptures(players, turn);
+
+        if(players[turn].getPossibleStrikeSize() > 0 && !continuousStrike){
+            option = 1;
+        }
+        else if(continuousStrike){
+            StrikingDraught strikingDraught = players[turn].getStrikingDraught(strikeX, strikeY);
+
+            if(strikingDraught != null){
+                option = 2;
+            }
+            else {
+                option = 3;
+                continuousStrike = false;
+                strikeX = 0;
+                strikeY = 0;
+                turn = changeTurn(turn);
+            }
+        }
+        else{
+            strikeX = 0;
+            strikeY = 0;
+            option = 3;
+        }
+
+
         if(oldY == 0 && oldX == 0){
             oldY = (int) mouseEvent.getX() / 100 + 1;
             oldX = (int) mouseEvent.getY() / 100 + 1;
@@ -55,23 +90,21 @@ public class GameController {
             newX = (int) mouseEvent.getY() / 100 + 1;
             ableToMove = true;
         }
-        gameMechanics.checkForCaptures(players, turn);
 
-        if(players[turn].getPossibleStrikeSize() > 0 && ableToMove){
-            gameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY);
-            continuousStrike = true;
-        }
-        else if(players[turn].getPossibleStrikeSize() == 0 && continuousStrike && ableToMove){
-            continuousStrike = false;
-            turn = changeTurn(turn);
-            gameMechanics.checkForCaptures(players, turn);
-            if(players[turn].getPossibleStrikeSize() > 0){
-                gameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY);
+        if(option == 1 && ableToMove){
+            if(gameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
+                strikeX = newX;
+                strikeY = newY;
                 continuousStrike = true;
             }
         }
-
-        if (!continuousStrike && ableToMove){
+        if (option == 2 && ableToMove){
+            if(strikeX == oldX && strikeY == oldY && gameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
+                strikeX = newX;
+                strikeY = newY;
+            }
+        }
+        if(option == 3 && ableToMove){
             Draught draught = players[turn].getDraught(oldX, oldY);
 
             if(draught == null || !gameMechanics.checkIfLegalMove(players, draught, oldX, oldY, newX, newY, turn)){

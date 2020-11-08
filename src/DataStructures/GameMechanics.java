@@ -16,7 +16,7 @@ public class GameMechanics {
 
         if(checkBounds(newX, newY)){
             if(draught.getIsDame()){
-                if((xDiff != 0 && yDiff == 0) || (xDiff == 0 && yDiff !=0)){
+                if((xDiff != 0 && yDiff == 0) || (xDiff == 0 && yDiff != 0)){
                     return false;
                 }
                 else {
@@ -57,16 +57,16 @@ public class GameMechanics {
         oldX += xMovingSign;
         oldY += yMovingSign;
 
-        for(int i = oldY; i <= newY; i+=yMovingSign){
-            if(!checkBounds(oldX, i)){
+        while(oldY != newY + yMovingSign){
+            if(!checkBounds(oldX, oldY)){
                 break;
             }
-
-            if(players[turn].getDraught(oldX, i) != null || players[oppositeTurn].getDraught(oldX, i) != null){
+            if(players[turn].getDraught(oldX, oldY) != null || players[oppositeTurn].getDraught(oldX, oldY) != null){
                 return false;
             }
 
             oldX += xMovingSign;
+            oldY += yMovingSign;
         }
 
         return true;
@@ -79,6 +79,11 @@ public class GameMechanics {
 
         for(Draught playerDraught : playerDraughts){
             for(Draught opponentDraught : opponentDraughts){
+                if(playerDraught.getIsDame()){
+                    checkForCapturesAsDame(players, playerDraught, turn);
+                    break;
+                }
+
                 int playerX = playerDraught.getPosition().getX();
                 int playerY = playerDraught.getPosition().getY();
                 int opponentX = opponentDraught.getPosition().getX();
@@ -94,6 +99,74 @@ public class GameMechanics {
                     }
 
                 }
+            }
+        }
+    }
+
+    public void checkForCapturesAsDame(Player [] players, Draught draught, int turn){
+        int opponentTurn = getOpponentTurnNumber(turn);
+        int x1 = draught.getPosition().getX();
+        int y1 = draught.getPosition().getY();
+        int x2 = x1;
+        int y2 = y1;
+
+        //goes up and right
+        for(int i = y2+1; i <= 7; i++){
+            x2--;
+            if(!checkBounds(x2, i) || !checkBounds(x2 - 1, i+ 1)){
+                break;
+            }
+            if(players[opponentTurn].getDraught(x2, i) != null){
+                if(players[turn].getDraught(x2 - 1, i + 1) == null && players[opponentTurn].getDraught(x2 - 1, i + 1) == null){
+                    players[turn].addPossibleStrike(new StrikingDraught (new Position(x1, y1), new Position(x2, i), new Position( x2-1, i+1)));
+                }
+                break;
+            }
+        }
+        x2 = x1;
+
+        // goes down and right
+        for(int i = y2+1; i <= 7; i++){
+            x2++;
+            if(!checkBounds(x2, i) || !checkBounds(x2 + 1, i + 1)){
+                break;
+            }
+            if(players[opponentTurn].getDraught(x2, i) != null){
+                if(players[turn].getDraught(x2 + 1, i + 1) == null && players[opponentTurn].getDraught(x2 + 1, i + 1) == null){
+                    players[turn].addPossibleStrike(new StrikingDraught (new Position(x1, y1), new Position(x2, i), new Position( x2+1, i+1)));
+                    //System.out.println(x1 + " " + y1 + " " +  (x2+1) + " " + (i+1) + "b");
+                }
+                break;
+            }
+        }
+        x2 = x1;
+
+        // goes up and left
+        for(int i = y2-1; i >= 2; i--){
+            x2--;
+            if(!checkBounds(x2, i) || !checkBounds(x2 - 1, i - 1)){
+                break;
+            }
+            if(players[opponentTurn].getDraught(x2, i) != null){
+                if(players[turn].getDraught(x2 - 1, i - 1) == null && players[opponentTurn].getDraught(x2 - 1, i - 1) == null){
+                    players[turn].addPossibleStrike(new StrikingDraught (new Position(x1, y1), new Position(x2, i), new Position( x2-1, i-1)));
+                }
+                break;
+            }
+        }
+        x2 = x1;
+
+        // goes down and left
+        for(int i = y2-1; i >= 2; i--){
+            x2++;
+            if(!checkBounds(x2, i) || !checkBounds(x2 + 1, i- 1)){
+                break;
+            }
+            if(players[opponentTurn].getDraught(x2, i) != null){
+                if(players[turn].getDraught(x2 + 1, i - 1) == null && players[opponentTurn].getDraught(x2 + 1, i - 1) == null){
+                    players[turn].addPossibleStrike(new StrikingDraught (new Position(x1, y1), new Position(x2, i), new Position( x2+1, i-1)));
+                }
+                break;
             }
         }
     }
@@ -140,7 +213,7 @@ public class GameMechanics {
         board.addCircle(newX, newY, colour, draught.getIsDame());
     }
 
-    public void captureDraught(Board board, Player[] players, int turn, int x1, int y1, int x2, int y2){
+    public boolean captureDraught(Board board, Player[] players, int turn, int x1, int y1, int x2, int y2){
         int opponentTurn = getOpponentTurnNumber(turn);
         StrikingDraught strikingDraught = players[turn].getStrikingDraught(x1, y1);
 
@@ -154,15 +227,19 @@ public class GameMechanics {
             if(x2 == jumpingPos.getX() && y2 == jumpingPos.getY()){
                 moveDraught(board, playerDraught, x2, y2, players[turn].getColour());
                 removeDraught(board, players[opponentTurn], opponentDraught);
+                players[turn].clearStrikes();
+                return true;
             }
             else{
-                System.out.println("Fucks ur problem");
+                System.out.println(opponentPos.getX() + " " + opponentPos.getY());
+                System.out.println(jumpingPos.getX() + " " + jumpingPos.getY());
             }
         }
         else{
             System.out.println("You must choose a striking draught.");
         }
         players[turn].clearStrikes();
+        return false;
     }
     public void removeDraught(Board board, Player player, Draught draught){
         board.removeCircle(draught.getPosition().getX(), draught.getPosition().getY());
