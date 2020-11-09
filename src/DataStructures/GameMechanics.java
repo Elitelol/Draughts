@@ -1,5 +1,7 @@
 package DataStructures;
 
+import javafx.scene.control.Alert;
+
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -134,7 +136,6 @@ public class GameMechanics {
             if(players[opponentTurn].getDraught(x2, i) != null){
                 if(players[turn].getDraught(x2 + 1, i + 1) == null && players[opponentTurn].getDraught(x2 + 1, i + 1) == null){
                     players[turn].addPossibleStrike(new StrikingDraught (new Position(x1, y1), new Position(x2, i), new Position( x2+1, i+1)));
-                    //System.out.println(x1 + " " + y1 + " " +  (x2+1) + " " + (i+1) + "b");
                 }
                 break;
             }
@@ -214,6 +215,9 @@ public class GameMechanics {
     }
 
     public boolean captureDraught(Board board, Player[] players, int turn, int x1, int y1, int x2, int y2){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Information");
+        alert.setContentText(null);
         int opponentTurn = getOpponentTurnNumber(turn);
         StrikingDraught strikingDraught = players[turn].getStrikingDraught(x1, y1);
 
@@ -231,12 +235,13 @@ public class GameMechanics {
                 return true;
             }
             else{
-                System.out.println(opponentPos.getX() + " " + opponentPos.getY());
-                System.out.println(jumpingPos.getX() + " " + jumpingPos.getY());
+                alert.setHeaderText("Incorrect jumping position.");
+                alert.showAndWait();
             }
         }
         else{
-            System.out.println("You must choose a striking draught.");
+            alert.setHeaderText("You must choose a striking draught.");
+            alert.showAndWait();
         }
         players[turn].clearStrikes();
         return false;

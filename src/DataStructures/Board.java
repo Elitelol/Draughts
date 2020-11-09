@@ -9,7 +9,6 @@ import javafx.scene.shape.Rectangle;
 public class Board {
     private Group circles = new Group();
     private Group squares = new Group();
-    private Group dameCircles = new Group();
 
     public void generateBoard(){
         squares.getChildren().clear();

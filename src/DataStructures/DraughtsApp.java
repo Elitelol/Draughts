@@ -20,6 +20,7 @@ public class DraughtsApp extends Application {
 
         GameController gameController = loader.getController();
         gameController.setBoard(board);
+        gameController.turnLabel.setText("White turn.");
         gameController.stackPane.getChildren().addAll(board.getBoard(), board.getCircles());
 
         primaryStage.setTitle("Draughts");
