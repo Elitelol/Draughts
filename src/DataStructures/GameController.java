@@ -17,11 +17,9 @@ public class GameController {
     private int oldY, oldX;
     private int newY, newX;
     private int strikeX, strikeY;
-    private int option;
     private boolean continuousStrike;
     private boolean ableToMove;
     private Player[] players;
-    private GameMechanics gameMechanics;
     private boolean gameOver;
 
     public GameController(){
@@ -30,14 +28,12 @@ public class GameController {
         players = new Player[]{new Player("White"), new Player("Black")};
         players[0].generateDraughts();
         players[1].generateDraughts();
-        gameMechanics = new GameMechanics();
         oldY = 0;
         oldX = 0;
         newY = 0;
         newX = 0;
         strikeX = 0;
         strikeY = 0;
-        option = 0;
         ableToMove = false;
         gameOver = false;
     }
@@ -65,7 +61,7 @@ public class GameController {
         int option;
         int tempTurn = turn;
 
-        gameMechanics.checkForCaptures(players, turn);
+        GameRules.checkForCaptures(players, turn);
 
         if(players[0].getDraughtSize() == 0 || players[1].getDraughtSize() == 0 || gameOver){
             option = 0;
@@ -117,14 +113,14 @@ public class GameController {
         }
 
         if(option == 1 && ableToMove){
-            if(gameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
+            if(GameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
                 strikeX = newX;
                 strikeY = newY;
                 continuousStrike = true;
             }
         }
         if (option == 2 && ableToMove){
-            if(strikeX == oldX && strikeY == oldY && gameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
+            if(strikeX == oldX && strikeY == oldY && GameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
                 strikeX = newX;
                 strikeY = newY;
             }
@@ -132,12 +128,12 @@ public class GameController {
         if(option == 3 && ableToMove){
             Draught draught = players[turn].getDraught(oldX, oldY);
 
-            if(draught == null || !gameMechanics.checkIfLegalMove(players, draught, oldX, oldY, newX, newY, turn)){
+            if(draught == null || !GameRules.checkIfLegalMove(players, draught, oldX, oldY, newX, newY, turn)){
                 alert.setHeaderText("Draught incorrectly selected.");
                 alert.showAndWait();
             }
             else{
-                gameMechanics.moveDraught(board, draught, newX, newY, players[turn].getColour());
+                GameMechanics.moveDraught(board, draught, newX, newY, players[turn].getColour());
                 turn = changeTurn(turn);
             }
         }
