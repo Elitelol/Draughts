@@ -1,40 +1,31 @@
 package DataStructures;
 
+import GameLogic.GameMechanics;
+import GameLogic.GameRules;
 import javafx.event.ActionEvent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
-import java.util.ArrayList;
-
 public class GameController {
     public StackPane stackPane;
     public Label turnLabel;
     private Board board;
+    private GameState gameState;
     private int turn;
     private int oldY, oldX;
     private int newY, newX;
-    private int strikeX, strikeY;
-    private boolean continuousStrike;
-    private boolean ableToMove;
-    private Player[] players;
+    private final Player[] players;
     private boolean gameOver;
 
     public GameController(){
         this.turn = 0;
-        this.continuousStrike = false;
-        players = new Player[]{new Player("White"), new Player("Black")};
-        players[0].generateDraughts();
-        players[1].generateDraughts();
+        players = new Player[]{new WhitePlayer("White", -1), new BlackPlayer("Black", 1)};
         oldY = 0;
         oldX = 0;
         newY = 0;
         newX = 0;
-        strikeX = 0;
-        strikeY = 0;
-        ableToMove = false;
         gameOver = false;
     }
 
@@ -42,8 +33,17 @@ public class GameController {
         this.board = board;
     }
 
-    public int changeTurn(int turn){
-        return turn == 0 ? 1 : 0;
+    public void setCoordinates(MouseEvent mouseEvent){
+        if(oldY == 0 && oldX == 0){
+            oldY = (int) mouseEvent.getX() / 100 + 1;
+            oldX = (int) mouseEvent.getY() / 100 + 1;
+            gameState = determineGameState();
+        }
+        else{
+            newY = (int) mouseEvent.getX() / 100 + 1;
+            newX = (int) mouseEvent.getY() / 100 + 1;
+            moveDraught();
+        }
     }
 
     public void clearCoordinates(){
@@ -51,111 +51,61 @@ public class GameController {
         oldX = 0;
         newY = 0;
         newX = 0;
-        ableToMove = false;
-    }
-
-    public void moveDraught(MouseEvent mouseEvent) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setContentText(null);
-        int option;
-        int tempTurn = turn;
-
-        GameRules.checkForCaptures(players, turn);
-
-        if(players[0].getDraughtSize() == 0 || players[1].getDraughtSize() == 0 || gameOver){
-            option = 0;
-        }
-        else if(players[turn].getPossibleStrikeSize() > 0 && !continuousStrike){
-            option = 1;
-        }
-        else if(continuousStrike){
-            StrikingDraught strikingDraught = players[turn].getStrikingDraught(strikeX, strikeY);
-
-            if(strikingDraught != null){
-                option = 2;
-            }
-            else {
-                option = 3;
-                continuousStrike = false;
-                strikeX = 0;
-                strikeY = 0;
-                turn = changeTurn(turn);
-            }
-        }
-        else{
-            strikeX = 0;
-            strikeY = 0;
-            option = 3;
-        }
-
-        if(oldY == 0 && oldX == 0){
-            oldY = (int) mouseEvent.getX() / 100 + 1;
-            oldX = (int) mouseEvent.getY() / 100 + 1;
-        }
-        else{
-            newY = (int) mouseEvent.getX() / 100 + 1;
-            newX = (int) mouseEvent.getY() / 100 + 1;
-            ableToMove = true;
-        }
-
-        if(option == 0){
-            if(gameOver){
-                alert.setHeaderText("Game is over.");
-            }
-            else if(players[0].getDraughtSize() == 0){
-                alert.setHeaderText("Black won.");
-            }
-            else{
-                alert.setHeaderText("White won.");
-            }
-            alert.showAndWait();
-        }
-
-        if(option == 1 && ableToMove){
-            if(GameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
-                strikeX = newX;
-                strikeY = newY;
-                continuousStrike = true;
-            }
-        }
-        if (option == 2 && ableToMove){
-            if(strikeX == oldX && strikeY == oldY && GameMechanics.captureDraught(board, players, turn, oldX, oldY, newX, newY)){
-                strikeX = newX;
-                strikeY = newY;
-            }
-        }
-        if(option == 3 && ableToMove){
-            Draught draught = players[turn].getDraught(oldX, oldY);
-
-            if(draught == null || !GameRules.checkIfLegalMove(players, draught, oldX, oldY, newX, newY, turn)){
-                alert.setHeaderText("Draught incorrectly selected.");
-                alert.showAndWait();
-            }
-            else{
-                GameMechanics.moveDraught(board, draught, newX, newY, players[turn].getColour());
-                turn = changeTurn(turn);
-            }
-        }
-
-        if(turn != tempTurn){
-            turnLabel.setText(players[turn].getColour() + " turn.");
-        }
-
-        if(oldY != 0 && oldX != 0 && newY != 0 && newX != 0){
-            clearCoordinates();
-            AnchorPane root  = (AnchorPane) stackPane.getScene().getRoot();
-            root.getChildren().removeAll(board.getCircles());
-            root.getChildren().addAll(board.getCircles());
-        }
     }
 
     public void setGameOver(ActionEvent actionEvent) {
         gameOver = true;
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setContentText(null);
-        alert.setHeaderText(players[turn].getColour() + " surrendered.");
-        alert.showAndWait();
+        GameRules.showAlert(players[turn].getColour() + " surrendered.");
+    }
+
+    private void moveDraught() {
+        if(gameOver || players[0].getDraughtSize() == 0 || players[1].getDraughtSize() == 0){
+            GameRules.showAlert("Game is over.");
+        }
+        Draught playerDraught = players[turn].getDraught(oldX, oldY);
+
+        if(playerDraught == null){
+            GameRules.showAlert("Invalid draught is selected.");
+        }
+        else if(gameState == GameState.STRIKE || (gameState == GameState.CONTINUOUS_STRIKE && players[turn].isStrikingDraught(playerDraught))){
+            GameMechanics.captureDraught(board, players, turn, playerDraught, newX, newY);
+        }
+        else if (!players[turn].isStrikingDraught(playerDraught) && gameState == GameState.CONTINUOUS_STRIKE){
+            GameRules.showAlert("Invalid continuous striking draught selected.");
+        }
+        else if(gameState == GameState.MOVE && GameRules.checkIfLegalMove(players, playerDraught, oldX, oldY, newX, newY, turn)){
+            GameMechanics.moveDraught(board, playerDraught, newX, newY, players[turn].getColour());
+            turn = GameRules.changeTurn(turn);
+        }
+        else{
+            GameRules.showAlert("Unable to move to that position.");
+        }
+
+        turnLabel.setText("Turn: " + players[turn].getColour());
+        clearCoordinates();
+        AnchorPane root  = (AnchorPane) stackPane.getScene().getRoot();
+        root.getChildren().removeAll(board.getCircles());
+        root.getChildren().addAll(board.getCircles());
+    }
+
+    private GameState determineGameState(){
+        GameRules.checkForStrikes(players, turn);
+
+        if(players[turn].getStrikingDraught() == null && players[turn].isAbleToStrike()){
+            return GameState.STRIKE;
+        }
+        else if(players[turn].getStrikingDraught() != null){
+            if(players[turn].isContinuousStrike()){
+                return GameState.CONTINUOUS_STRIKE;
+            }
+            else {
+                players[turn].setStrikingDraught(null);
+                turn = GameRules.changeTurn(turn);
+                turnLabel.setText("Turn: " + players[turn].getColour());
+                return determineGameState();
+            }
+        }
+
+        return GameState.MOVE;
     }
 }

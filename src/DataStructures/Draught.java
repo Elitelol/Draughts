@@ -1,12 +1,16 @@
 package DataStructures;
 
+import java.util.ArrayList;
+
 public class Draught {
-    private Position position;
+    private final Position position;
     private boolean isDame;
+    private final ArrayList<StrikeableDraught> strikeableDraughts;
 
     public Draught(int x, int y){
         this.position = new Position(x, y);
         this.isDame = false;
+        this.strikeableDraughts = new ArrayList<>();
     }
 
     public Position getPosition() {
@@ -47,5 +51,27 @@ public class Draught {
 
     public boolean isDraughtNear(Draught draught){
         return getXDistance(draught) == 1 && getYDistance(draught) == 1;
+    }
+
+    public void addStrikingDraughts(StrikeableDraught strikeableDraught){
+        strikeableDraughts.add(strikeableDraught);
+    }
+
+    public int getStrikingSize(){
+        return strikeableDraughts.size();
+    }
+
+    public StrikeableDraught getStrikingDraught(int x, int y){
+        for(StrikeableDraught strikeableDraught : strikeableDraughts){
+            if(strikeableDraught.getJumpingPosition().getX() == x && strikeableDraught.getJumpingPosition().getY() == y){
+                return strikeableDraught;
+            }
+        }
+
+        return null;
+    }
+
+    public void clearStrikes(){
+        strikeableDraughts.clear();
     }
 }

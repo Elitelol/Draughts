@@ -7,8 +7,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 
 public class Board {
-    private Group circles = new Group();
-    private Group squares = new Group();
+    private final Group circles = new Group();
+    private final Group squares = new Group();
 
     public void generateBoard(){
         squares.getChildren().clear();

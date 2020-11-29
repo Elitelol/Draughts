@@ -2,52 +2,27 @@ package DataStructures;
 
 import java.util.ArrayList;
 
-public class Player {
+public abstract class Player {
     private final String colour;
-    private ArrayList<Draught> draughtList;
-    private ArrayList<StrikingDraught> possibleStrikes;
-    private final int movingSign;
+    private final ArrayList<Draught> draughtList;
+    private final int movingDirection;
+    private Draught strikingDraught;
 
-    public Player(String colour){
+    public Player(String colour, int movingDirection){
         this.colour = colour;
-        draughtList = generateDraughts();
-        possibleStrikes = new ArrayList<>();
-
-        if(colour.equals("White")){
-            movingSign = -1;
-        }
-        else{
-            movingSign = 1;
-        }
+        draughtList = new ArrayList<>();
+        this.movingDirection = movingDirection;
+        this.strikingDraught = null;
     }
 
-    public ArrayList<Draught> generateDraughts(){
-        ArrayList<Draught> tempList = new ArrayList<>();
-        int startingPos;
-        int endingPos;
-
-        if(colour.equals("White")){
-            startingPos = 6;
-            endingPos = 8;
-        }
-        else{
-            startingPos = 1;
-            endingPos = 3;
-        }
-
-        for(int i = startingPos; i <= endingPos; i++){
-            int puttingPosition = i % 2 == 0 ? 1 : 2;
-
-            for(int j = puttingPosition; j <= 8; j += 2){
-                tempList.add(new Draught(i, j));
-            }
-        }
-
-        return tempList;
-    }
+    public abstract void generateDraughts();
 
     public ArrayList<Draught> getDraughts(){
         return draughtList;
+    }
+
+    public void addDraught(Draught draught){
+        draughtList.add(draught);
     }
 
     public int getDraughtSize(){
@@ -73,41 +48,49 @@ public class Player {
         }
     }
 
-    public int getMovingSign() {
-        return movingSign;
+    public int getMovingDirection() {
+        return movingDirection;
     }
 
     public String getColour() {
         return colour;
     }
 
-    public void addPossibleStrike(StrikingDraught strikingDraught){
-        possibleStrikes.add(strikingDraught);
+    public Draught getStrikingDraught() {
+        return strikingDraught;
     }
 
-    public int getPossibleStrikeSize(){
-        return possibleStrikes.size();
-    }
-
-    public StrikingDraught getStrikingDraught(int x, int y){
-
-        for(StrikingDraught strikingDraught : possibleStrikes){
-            Position playerDraught = strikingDraught.getPlayerDraught();
-
-            if(playerDraught.getX() == x && playerDraught.getY() == y){
-                return strikingDraught;
+    public boolean isAbleToStrike(){
+        for(Draught draught : draughtList){
+            if(draught.getStrikingSize() > 0){
+                return true;
             }
         }
 
-        return null;
-    }
-
-    public ArrayList<StrikingDraught> getPossibleStrikes(){
-        return  possibleStrikes;
+        return false;
     }
 
     public void clearStrikes(){
-        possibleStrikes.clear();
+        for(Draught draught : draughtList){
+            draught.clearStrikes();
+        }
     }
 
+    public void setStrikingDraught(Draught strikingDraught) {
+        this.strikingDraught = strikingDraught;
+    }
+
+    public boolean isContinuousStrike(){
+        Draught draught = getDraught(strikingDraught.getX(), strikingDraught.getY());
+
+        return draught.getStrikingSize() > 0;
+    }
+
+    public boolean isStrikingDraught(Draught draught){
+        if(strikingDraught != null){
+            return strikingDraught.getX() == draught.getX() && strikingDraught.getY() == draught.getY();
+        }
+
+        return false;
+    }
 }

@@ -2,7 +2,6 @@ package DataStructures;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Group;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -20,7 +19,7 @@ public class DraughtsApp extends Application {
 
         GameController gameController = loader.getController();
         gameController.setBoard(board);
-        gameController.turnLabel.setText("White turn.");
+        gameController.turnLabel.setText("Turn: White");
         gameController.stackPane.getChildren().addAll(board.getBoard(), board.getCircles());
 
         primaryStage.setTitle("Draughts");
