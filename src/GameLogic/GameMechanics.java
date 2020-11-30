@@ -1,5 +1,7 @@
 package GameLogic;
 import DataStructures.*;
+import GameUtilities.AlertMessenger;
+import GameUtilities.TurnState;
 
 public class GameMechanics {
     public static void moveDraught(Board board, Draught draught, int newX, int newY, String colour){
@@ -14,21 +16,20 @@ public class GameMechanics {
         board.addCircle(newX, newY, colour, draught.getIsDame());
     }
 
-    public static void captureDraught(Board board, Player[] players, int turn, Draught playerDraught, int x2, int y2){
-        int opponentTurn = GameRules.changeTurn(turn);
-        StrikeableDraught strikeableDraught = playerDraught.getStrikingDraught(x2, y2);
+    public static void captureDraught(Board board, Player[] players, Draught playerDraught, int newX, int newY){
+        StrikeableDraught strikeableDraught = playerDraught.getStrikingDraught(newX, newY);
 
         if(strikeableDraught == null){
-            GameRules.showAlert("You must use a striking draught properly.");
+            AlertMessenger.showAlert("You must use a striking draught properly.");
         }
         else {
             Position opponentPos = strikeableDraught.getOpponentDraught();
-            Draught opponentDraught = players[opponentTurn].getDraught(opponentPos.getX(), opponentPos.getY());
+            Draught opponentDraught = players[TurnState.getOpponentTurn()].getDraught(opponentPos.getX(), opponentPos.getY());
 
-            moveDraught(board, playerDraught, x2, y2, players[turn].getColour());
-            removeDraught(board, players[opponentTurn], opponentDraught);
-            players[turn].setStrikingDraught(playerDraught);
-            players[turn].clearStrikes();
+            moveDraught(board, playerDraught, newX, newY, players[TurnState.getTurn()].getColour());
+            removeDraught(board, players[TurnState.getOpponentTurn()], opponentDraught);
+            players[TurnState.getTurn()].setStrikingDraught(playerDraught);
+            players[TurnState.getTurn()].clearStrikes();
         }
     }
 

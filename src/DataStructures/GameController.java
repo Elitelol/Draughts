@@ -1,7 +1,8 @@
 package DataStructures;
 
-import GameLogic.GameMechanics;
 import GameLogic.GameRules;
+import GameUtilities.AlertMessenger;
+import GameUtilities.TurnState;
 import javafx.event.ActionEvent;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -12,15 +13,13 @@ public class GameController {
     public StackPane stackPane;
     public Label turnLabel;
     private Board board;
-    private GameState gameState;
-    private int turn;
     private int oldY, oldX;
     private int newY, newX;
     private final Player[] players;
     private boolean gameOver;
+    ExecutionStrategy executionStrategy;
 
     public GameController(){
-        this.turn = 0;
         players = new Player[]{new WhitePlayer("White", -1), new BlackPlayer("Black", 1)};
         oldY = 0;
         oldX = 0;
@@ -37,7 +36,7 @@ public class GameController {
         if(oldY == 0 && oldX == 0){
             oldY = (int) mouseEvent.getX() / 100 + 1;
             oldX = (int) mouseEvent.getY() / 100 + 1;
-            gameState = determineGameState();
+            executionStrategy = determineGameState();
         }
         else{
             newY = (int) mouseEvent.getX() / 100 + 1;
@@ -55,57 +54,47 @@ public class GameController {
 
     public void setGameOver(ActionEvent actionEvent) {
         gameOver = true;
-        GameRules.showAlert(players[turn].getColour() + " surrendered.");
+        AlertMessenger.showAlert(players[TurnState.getTurn()].getColour() + " surrendered.");
     }
 
     private void moveDraught() {
-        if(gameOver || players[0].getDraughtSize() == 0 || players[1].getDraughtSize() == 0){
-            GameRules.showAlert("Game is over.");
-        }
-        Draught playerDraught = players[turn].getDraught(oldX, oldY);
+        Draught playerDraught = players[TurnState.getTurn()].getDraught(oldX, oldY);
 
-        if(playerDraught == null){
-            GameRules.showAlert("Invalid draught is selected.");
+        if(gameOver || players[0].getDraughtSize() == 0 || players[1].getDraughtSize() == 0){
+            AlertMessenger.showAlert("Game is over.");
         }
-        else if(gameState == GameState.STRIKE || (gameState == GameState.CONTINUOUS_STRIKE && players[turn].isStrikingDraught(playerDraught))){
-            GameMechanics.captureDraught(board, players, turn, playerDraught, newX, newY);
-        }
-        else if (!players[turn].isStrikingDraught(playerDraught) && gameState == GameState.CONTINUOUS_STRIKE){
-            GameRules.showAlert("Invalid continuous striking draught selected.");
-        }
-        else if(gameState == GameState.MOVE && GameRules.checkIfLegalMove(players, playerDraught, oldX, oldY, newX, newY, turn)){
-            GameMechanics.moveDraught(board, playerDraught, newX, newY, players[turn].getColour());
-            turn = GameRules.changeTurn(turn);
+        else if(playerDraught == null){
+            AlertMessenger.showAlert("Draught selected incorrectly.");
         }
         else{
-            GameRules.showAlert("Unable to move to that position.");
+            executionStrategy.execute(board, players, playerDraught, newX, newY);
         }
 
-        turnLabel.setText("Turn: " + players[turn].getColour());
+        turnLabel.setText("Turn: " + players[TurnState.getTurn()].getColour());
         clearCoordinates();
         AnchorPane root  = (AnchorPane) stackPane.getScene().getRoot();
         root.getChildren().removeAll(board.getCircles());
         root.getChildren().addAll(board.getCircles());
     }
 
-    private GameState determineGameState(){
-        GameRules.checkForStrikes(players, turn);
+    private ExecutionStrategy determineGameState(){
+        int turn = TurnState.getTurn();
+        GameRules.checkForStrikes(players);
 
         if(players[turn].getStrikingDraught() == null && players[turn].isAbleToStrike()){
-            return GameState.STRIKE;
+            return new StrikeStrategy();
         }
         else if(players[turn].getStrikingDraught() != null){
             if(players[turn].isContinuousStrike()){
-                return GameState.CONTINUOUS_STRIKE;
+                return new ContinuousStrikeStrategy();
             }
             else {
-                players[turn].setStrikingDraught(null);
-                turn = GameRules.changeTurn(turn);
-                turnLabel.setText("Turn: " + players[turn].getColour());
+                players[TurnState.getTurn()].setStrikingDraught(null);
+                TurnState.changeTurn();
+                turnLabel.setText("Turn: " + players[TurnState.getTurn()].getColour());
                 return determineGameState();
             }
         }
-
-        return GameState.MOVE;
+        return new MoveStrategy();
     }
 }

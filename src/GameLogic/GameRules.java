@@ -1,34 +1,30 @@
 package GameLogic;
-import DataStructures.Draught;
-import DataStructures.Player;
-import DataStructures.Position;
-import DataStructures.StrikeableDraught;
-import javafx.scene.control.Alert;
-
+import DataStructures.*;
+import GameUtilities.TurnState;
 import java.util.ArrayList;
 
 public class GameRules {
-    public static boolean checkIfLegalMove(Player[] players, Draught draught, int oldX, int oldY, int newX, int newY, int turn){
+    public static boolean checkIfLegalMove(Player[] players, Draught draught, int oldX, int oldY, int newX, int newY){
         if(!checkBounds(newX, newY)){
             return false;
         }
         else if(draught.getIsDame() && (Math.abs(newY - oldY) == Math.abs(oldX - newX))){
-            return checkDameLegalMove(players, oldX, oldY, newX, newY, turn);
+            return checkDameLegalMove(players, oldX, oldY, newX, newY);
         }
         else{
-            return ((Math.abs(newY - oldY) == 1 && (newX - oldX) == players[turn].getMovingDirection())
-                    && isTileClear(newX, newY, players, turn));
+            return ((Math.abs(newY - oldY) == 1 && (newX - oldX) == players[TurnState.getTurn()].getMovingDirection())
+                    && isTileClear(newX, newY, players));
         }
     }
 
-    private static boolean checkDameLegalMove(Player [] players, int oldX, int oldY, int newX, int newY, int turn){
+    private static boolean checkDameLegalMove(Player [] players, int oldX, int oldY, int newX, int newY){
         int xMovingDirection = getMovingDirection(oldX, newX);
         int yMovingDirection = getMovingDirection(oldY, newY);
         oldX += xMovingDirection;
         oldY += yMovingDirection;
 
         while(oldY <= newY && checkBounds(oldX, oldY)){
-            if(!isTileClear(oldX, oldY, players, turn)){
+            if(!isTileClear(oldX, oldY, players)){
                 return false;
             }
             oldX += xMovingDirection;
@@ -38,36 +34,34 @@ public class GameRules {
         return true;
     }
 
-    public static void checkForStrikes(Player[] players, int turn){
-        int opponentTurn = changeTurn(turn);
-        ArrayList<Draught> playerDraughts = players[turn].getDraughts();
-        ArrayList<Draught> opponentDraughts = players[opponentTurn].getDraughts();
+    public static void checkForStrikes(Player[] players){
+        ArrayList<Draught> playerDraughts = players[TurnState.getTurn()].getDraughts();
+        ArrayList<Draught> opponentDraughts = players[TurnState.getOpponentTurn()].getDraughts();
 
         for(Draught playerDraught : playerDraughts){
             if(playerDraught.getIsDame()){
-                checkForStrikesAsDame(players, playerDraught, turn, 1, -1); // down left
-                checkForStrikesAsDame(players, playerDraught, turn, -1, -1); // up left
-                checkForStrikesAsDame(players, playerDraught, turn, 1, 1); // down right
-                checkForStrikesAsDame(players, playerDraught, turn, -1, 1); // up right
+                checkForStrikesAsDame(players, playerDraught, 1, -1); // down left
+                checkForStrikesAsDame(players, playerDraught, -1, -1); // up left
+                checkForStrikesAsDame(players, playerDraught, 1, 1); // down right
+                checkForStrikesAsDame(players, playerDraught, -1, 1); // up right
             }
             else{
-                checkForStrikesAsDraught(playerDraught, opponentDraughts, players, turn);
+                checkForStrikesAsDraught(playerDraught, opponentDraughts, players);
             }
         }
     }
 
-    private static void checkForStrikesAsDame(Player [] players, Draught draught, int turn, int xMovingDirection, int yMovingDirection){
-        int opponentTurn = changeTurn(turn);
+    private static void checkForStrikesAsDame(Player [] players, Draught draught, int xMovingDirection, int yMovingDirection){
         int x = draught.getX() + xMovingDirection;
         int y = draught.getY() + yMovingDirection;
 
-        while(checkStrikingBounds(x, y) && players[turn].getDraught(x, y) == null){
-            if(players[opponentTurn].getDraught(x, y) == null){
+        while(checkStrikingBounds(x, y) && players[TurnState.getTurn()].getDraught(x, y) == null){
+            if(players[TurnState.getOpponentTurn()].getDraught(x, y) == null){
                 x += xMovingDirection;
                 y += yMovingDirection;
                 continue;
             }
-            if(isTileClear(x + xMovingDirection, y + yMovingDirection, players, turn)){
+            if(isTileClear(x + xMovingDirection, y + yMovingDirection, players)){
                 StrikeableDraught strikeableDraught = new StrikeableDraught(new Position(x, y), new Position(x + xMovingDirection, y + yMovingDirection));
                 draught.addStrikingDraughts(strikeableDraught);
             }
@@ -75,12 +69,12 @@ public class GameRules {
         }
     }
 
-    private static void checkForStrikesAsDraught(Draught playerDraught, ArrayList<Draught> opponentDraughts, Player [] players, int turn){
+    private static void checkForStrikesAsDraught(Draught playerDraught, ArrayList<Draught> opponentDraughts, Player [] players){
         for(Draught opponentDraught : opponentDraughts){
             if(!playerDraught.isDraughtNear(opponentDraught)){
                 continue;
             }
-            Position jumpingPosition = possibleForJump(playerDraught, opponentDraught, players, turn);
+            Position jumpingPosition = possibleForJump(playerDraught, opponentDraught, players);
 
             if(jumpingPosition != null){
                 StrikeableDraught strikeableDraught = new StrikeableDraught(opponentDraught.getPosition(), jumpingPosition);
@@ -90,31 +84,19 @@ public class GameRules {
         }
     }
 
-    private static Position possibleForJump(Draught playerDraught, Draught opponentDraught, Player [] players, int turn){
+    private static Position possibleForJump(Draught playerDraught, Draught opponentDraught, Player [] players){
         int x = playerDraught.getX() + 2*(opponentDraught.getX() - playerDraught.getX());
         int y = playerDraught.getY() + 2*(opponentDraught.getY() - playerDraught.getY());
 
-        if(!checkBounds(x, y) || (playerDraught.getX() + 2*players[turn].getMovingDirection()) != x){
+        if(!checkBounds(x, y) || (playerDraught.getX() + 2*players[TurnState.getTurn()].getMovingDirection()) != x){
             return null;
         }
-        else if(isTileClear(x, y, players, turn)){
+        else if(isTileClear(x, y, players)){
             return new Position(x, y);
         }
         else{
             return null;
         }
-    }
-
-    public static int changeTurn(int turn){
-        return turn == 0 ? 1 : 0;
-    }
-
-    public static void showAlert(String message){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Information");
-        alert.setContentText(null);
-        alert.setHeaderText(message);
-        alert.showAndWait();
     }
 
     private static boolean checkBounds(int x, int y){
@@ -129,9 +111,8 @@ public class GameRules {
         return oldPos < newPos ? 1 : -1;
     }
 
-    private static boolean isTileClear(int x, int y, Player [] players, int turn){
-        int opponentTurn = changeTurn(turn);
-
-        return players[turn].getDraught(x, y) == null && players[opponentTurn].getDraught(x, y) == null;
+    private static boolean isTileClear(int x, int y, Player [] players){
+        return players[TurnState.getTurn()].getDraught(x, y) == null
+                && players[TurnState.getOpponentTurn()].getDraught(x, y) == null;
     }
 }
