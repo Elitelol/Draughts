@@ -5,11 +5,14 @@ import GameLogic.GameRules;
 import GameUtilities.AlertMessenger;
 import GameUtilities.TurnState;
 
-public class MoveStrategy implements ExecutionStrategy {
+public class SimpleMoveStrategy implements MovementStrategy {
     @Override
     public void execute(Board board, Player[] players, Draught playerDraught, int x2, int y2) {
-        if(GameRules.checkIfLegalMove(players, playerDraught, playerDraught.getX(), playerDraught.getY(), x2, y2)){
-            GameMechanics.moveDraught(board, playerDraught, x2, y2, players[TurnState.getTurn()].getColour());
+        GameRules gameRules = GameRules.getInstance();
+        GameMechanics gameMechanics = GameMechanics.getInstance();
+
+        if(gameRules.checkIfLegalMove(players, playerDraught, playerDraught.getX(), playerDraught.getY(), x2, y2)){
+            gameMechanics.moveDraught(board, playerDraught, x2, y2, players[TurnState.getTurn()].getColour());
             TurnState.changeTurn();
         }
         else{

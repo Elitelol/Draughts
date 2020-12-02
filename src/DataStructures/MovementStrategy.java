@@ -1,5 +1,5 @@
 package DataStructures;
 
-public interface ExecutionStrategy {
+public interface MovementStrategy {
      void execute(Board board, Player [] players, Draught playerDraught, int x2,  int y2);
 }

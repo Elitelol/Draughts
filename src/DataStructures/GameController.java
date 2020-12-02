@@ -17,7 +17,7 @@ public class GameController {
     private int newY, newX;
     private final Player[] players;
     private boolean gameOver;
-    ExecutionStrategy executionStrategy;
+    MovementStrategy movementStrategy;
 
     public GameController(){
         players = new Player[]{new WhitePlayer("White", -1), new BlackPlayer("Black", 1)};
@@ -36,12 +36,12 @@ public class GameController {
         if(oldY == 0 && oldX == 0){
             oldY = (int) mouseEvent.getX() / 100 + 1;
             oldX = (int) mouseEvent.getY() / 100 + 1;
-            executionStrategy = determineGameState();
+            movementStrategy = determineMovement();
         }
         else{
             newY = (int) mouseEvent.getX() / 100 + 1;
             newX = (int) mouseEvent.getY() / 100 + 1;
-            moveDraught();
+            executeMovement();
         }
     }
 
@@ -57,7 +57,7 @@ public class GameController {
         AlertMessenger.showAlert(players[TurnState.getTurn()].getColour() + " surrendered.");
     }
 
-    private void moveDraught() {
+    private void executeMovement() {
         Draught playerDraught = players[TurnState.getTurn()].getDraught(oldX, oldY);
 
         if(gameOver || players[0].getDraughtSize() == 0 || players[1].getDraughtSize() == 0){
@@ -67,19 +67,23 @@ public class GameController {
             AlertMessenger.showAlert("Draught selected incorrectly.");
         }
         else{
-            executionStrategy.execute(board, players, playerDraught, newX, newY);
+            movementStrategy.execute(board, players, playerDraught, newX, newY);
         }
 
         turnLabel.setText("Turn: " + players[TurnState.getTurn()].getColour());
         clearCoordinates();
+
         AnchorPane root  = (AnchorPane) stackPane.getScene().getRoot();
+
         root.getChildren().removeAll(board.getCircles());
         root.getChildren().addAll(board.getCircles());
     }
 
-    private ExecutionStrategy determineGameState(){
+    private MovementStrategy determineMovement(){
         int turn = TurnState.getTurn();
-        GameRules.checkForStrikes(players);
+        GameRules gameRules = GameRules.getInstance();
+
+        gameRules.checkForStrikes(players);
 
         if(players[turn].getStrikingDraught() == null && players[turn].isAbleToStrike()){
             return new StrikeStrategy();
@@ -92,9 +96,10 @@ public class GameController {
                 players[TurnState.getTurn()].setStrikingDraught(null);
                 TurnState.changeTurn();
                 turnLabel.setText("Turn: " + players[TurnState.getTurn()].getColour());
-                return determineGameState();
+
+                return determineMovement();
             }
         }
-        return new MoveStrategy();
+        return new SimpleMoveStrategy();
     }
 }
