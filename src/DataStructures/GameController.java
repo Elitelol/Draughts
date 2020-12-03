@@ -20,7 +20,9 @@ public class GameController {
     MovementStrategy movementStrategy;
 
     public GameController(){
-        players = new Player[]{new WhitePlayer("White", -1), new BlackPlayer("Black", 1)};
+        players = new Player[]{new WhitePlayer(), new BlackPlayer()};
+        players[0].generateDraughts();
+        players[1].generateDraughts();
         oldY = 0;
         oldX = 0;
         newY = 0;

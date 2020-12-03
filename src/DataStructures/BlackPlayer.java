@@ -1,9 +1,8 @@
 package DataStructures;
 
 public class BlackPlayer extends Player {
-    public BlackPlayer(String colour, int movingDirection) {
-        super(colour, movingDirection);
-        generateDraughts();
+    public BlackPlayer() {
+        super("Black", 1);
     }
 
     @Override

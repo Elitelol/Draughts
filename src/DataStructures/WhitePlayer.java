@@ -1,9 +1,8 @@
 package DataStructures;
 
 public class WhitePlayer extends Player {
-    public WhitePlayer(String colour, int movingDirection) {
-        super(colour, movingDirection);
-        generateDraughts();
+    public WhitePlayer() {
+        super("White", -1);
     }
 
     @Override
