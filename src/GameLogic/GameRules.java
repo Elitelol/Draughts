@@ -31,7 +31,7 @@ public class GameRules {
         oldX += xMovingDirection;
         oldY += yMovingDirection;
 
-        while(oldY <= newY && checkBounds(oldX, oldY)){
+        while(oldY <= newY && checkBounds(oldX, oldY)){ // TODO: pataisyti i aiskesni while
             if(!isTileClear(oldX, oldY, players)){
                 return false;
             }

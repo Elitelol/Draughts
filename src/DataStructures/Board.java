@@ -9,11 +9,15 @@ import javafx.scene.shape.Rectangle;
 public class Board {
     private final Group circles = new Group();
     private final Group squares = new Group();
+    private final int width = 8;
+    private final int height = 8;
+    private final int TILE_SIZE = 100;
+    private final int CIRCLE_RADIUS = 35;
 
     public void generateBoard(){
-        for(int i = 0; i < 8; i++){
-            for(int j = 0; j < 8; j++){
-                Rectangle rectangle = new Rectangle(j * 100, i * 100, 100, 100);
+        for(int i = 0; i < height; i++){
+            for(int j = 0; j < width; j++){
+                Rectangle rectangle = new Rectangle(j * TILE_SIZE, i * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 
                 if((i + j) % 2 == 0){
                     rectangle.setFill(Color.GREY);
@@ -31,17 +35,18 @@ public class Board {
     }
 
     public void populateWithCircles(){
-        for(int i = 1; i <= 8; i++){
-            for(int j = 1; j <= 8; j++){
+
+        for(int i = 1; i <= height; i++){
+            for(int j = 1; j <= width; j++){
                 if((i + j) % 2 != 0){
                     if(i <= 3){
-                        Circle circle = new Circle((j*100)-50, (i*100)-50, 35);
+                        Circle circle = new Circle((j*TILE_SIZE)-TILE_SIZE/2, (i*TILE_SIZE)-TILE_SIZE/2, CIRCLE_RADIUS);
 
                         circle.setFill(Color.BLACK);
                         circles.getChildren().add(circle);
                     }
                     if(i >= 6){
-                        Circle circle = new Circle((j*100)-50, (i*100)-50, 35);
+                        Circle circle = new Circle((j*TILE_SIZE)-TILE_SIZE/2, (i*TILE_SIZE)-TILE_SIZE/2, CIRCLE_RADIUS);
 
                         circle.setFill(Color.WHITE);
                         circles.getChildren().add(circle);
@@ -56,8 +61,8 @@ public class Board {
     }
 
     public void removeCircle(int x, int y){
-        x = (x * 100) - 50;
-        y = (y * 100) - 50;
+        x = (x * TILE_SIZE) - TILE_SIZE/2;
+        y = (y * TILE_SIZE) - TILE_SIZE/2;
 
         for(Node circle : circles.getChildren()){
             Circle temp = (Circle) circle;
@@ -70,8 +75,8 @@ public class Board {
     }
 
     public void addCircle(int x, int y, String playerColour, boolean isDame){
-        x = (x * 100) - 50;
-        y = (y * 100) - 50;
+        x = (x * TILE_SIZE) - TILE_SIZE/2;
+        y = (y * TILE_SIZE) - TILE_SIZE/2;
         Color circleColour;
 
         if(playerColour.equals("White")){
@@ -80,7 +85,7 @@ public class Board {
         else{
             circleColour = Color.BLACK;
         }
-        Circle circle = new Circle(y, x, 30, circleColour);
+        Circle circle = new Circle(y, x, CIRCLE_RADIUS, circleColour);
 
         if(isDame){
             circle.setStrokeWidth(10);

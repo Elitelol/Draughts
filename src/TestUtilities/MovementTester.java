@@ -1,9 +1,6 @@
 package TestUtilities;
 
-import DataStructures.BlackPlayer;
-import DataStructures.Draught;
-import DataStructures.Player;
-import DataStructures.WhitePlayer;
+import DataStructures.*;
 import GameLogic.GameRules;
 import junit.framework.TestCase;
 
