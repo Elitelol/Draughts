@@ -12,8 +12,10 @@ public class GameMechanics {
         return instance;
     }
 
-    public void moveDraught(Board board, Draught draught, int newX, int newY, String colour){
-        board.removeCircle(draught.getPosition().getX(), draught.getPosition().getY());
+    public void moveDraught(Board board, Draught draught, Position moveToPos, String colour){
+        int newX = moveToPos.getX();
+        int newY = moveToPos.getY();
+        board.removeCircle(draught.getX(), draught.getY());
         draught.setX(newX);
         draught.setY(newY);
 
@@ -24,7 +26,9 @@ public class GameMechanics {
         board.addCircle(newX, newY, colour, draught.getIsDame());
     }
 
-    public void captureDraught(Board board, Player[] players, Draught playerDraught, int newX, int newY){
+    public void captureDraught(Board board, Player[] players, Draught playerDraught, Position moveToPos){
+        int newX = moveToPos.getX();
+        int newY = moveToPos.getY();
         StrikeableDraught strikeableDraught = playerDraught.getStrikingDraught(newX, newY);
 
         if(strikeableDraught == null){
@@ -34,7 +38,7 @@ public class GameMechanics {
             Position opponentPos = strikeableDraught.getOpponentDraught();
             Draught opponentDraught = players[TurnState.getOpponentTurn()].getDraught(opponentPos.getX(), opponentPos.getY());
 
-            moveDraught(board, playerDraught, newX, newY, players[TurnState.getTurn()].getColour());
+            moveDraught(board, playerDraught, moveToPos, players[TurnState.getTurn()].getColour());
             removeDraught(board, players[TurnState.getOpponentTurn()], opponentDraught);
             players[TurnState.getTurn()].setStrikingDraught(playerDraught);
             players[TurnState.getTurn()].clearStrikes();

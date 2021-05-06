@@ -69,7 +69,7 @@ public class GameController {
             AlertMessenger.showAlert("Draught selected incorrectly.");
         }
         else{
-            movementStrategy.execute(board, players, playerDraught, newX, newY);
+            movementStrategy.execute(board, players, playerDraught, new Position(newX, newY));
         }
 
         turnLabel.setText("Turn: " + players[TurnState.getTurn()].getColour());

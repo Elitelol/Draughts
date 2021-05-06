@@ -7,12 +7,12 @@ import GameUtilities.TurnState;
 
 public class SimpleMoveStrategy implements MovementStrategy {
     @Override
-    public void execute(Board board, Player[] players, Draught playerDraught, int x2, int y2) {
+    public void execute(Board board, Player[] players, Draught playerDraught, Position moveToPos) {
         GameRules gameRules = GameRules.getInstance();
         GameMechanics gameMechanics = GameMechanics.getInstance();
 
-        if(gameRules.checkIfLegalMove(players, playerDraught, playerDraught.getX(), playerDraught.getY(), x2, y2)){
-            gameMechanics.moveDraught(board, playerDraught, x2, y2, players[TurnState.getTurn()].getColour());
+        if(gameRules.checkIfLegalMove(players, playerDraught, moveToPos)){
+            gameMechanics.moveDraught(board, playerDraught, moveToPos, players[TurnState.getTurn()].getColour());
             TurnState.changeTurn();
         }
         else{

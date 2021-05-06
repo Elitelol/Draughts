@@ -6,11 +6,11 @@ import GameUtilities.TurnState;
 
 public class ContinuousStrikeStrategy implements MovementStrategy {
     @Override
-    public void execute(Board board, Player[] players, Draught playerDraught, int x2, int y2) {
+    public void execute(Board board, Player[] players, Draught playerDraught, Position moveToPos) {
         GameMechanics gameMechanics = GameMechanics.getInstance();
 
         if(players[TurnState.getTurn()].isStrikingDraught(playerDraught)){
-            gameMechanics.captureDraught(board, players, playerDraught, x2, y2);
+            gameMechanics.captureDraught(board, players, playerDraught, moveToPos);
         }
         else{
             AlertMessenger.showAlert("Invalid continuous striking draught selected.");

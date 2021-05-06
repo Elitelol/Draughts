@@ -28,7 +28,7 @@ public class StrikingTester extends TestCase {
 
         //act
         gameRules.checkForStrikes(players);
-        gameMechanics.captureDraught(board, players, draught, 4, 1);
+        gameMechanics.captureDraught(board, players, draught, new Position(4, 1));
 
         //assert
         assertNull(players[1].getDraught(5, 2));
@@ -43,7 +43,7 @@ public class StrikingTester extends TestCase {
 
         //act
         gameRules.checkForStrikes(players);
-        gameMechanics.captureDraught(board, players, draught, 5, 8);
+        gameMechanics.captureDraught(board, players, draught, new Position(5, 8));
 
         //assert
         assertNull(players[1].getDraught(4, 7));

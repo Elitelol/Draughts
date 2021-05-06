@@ -4,9 +4,9 @@ import GameLogic.GameMechanics;
 
 public class StrikeStrategy implements MovementStrategy {
     @Override
-    public void execute(Board board, Player[] players, Draught playerDraught, int x2, int y2) {
+    public void execute(Board board, Player[] players, Draught playerDraught, Position moveToPos) {
         GameMechanics gameMechanics = GameMechanics.getInstance();
 
-        gameMechanics.captureDraught(board, players, playerDraught, x2, y2);
+        gameMechanics.captureDraught(board, players, playerDraught, moveToPos);
     }
 }

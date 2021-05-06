@@ -12,7 +12,12 @@ public class GameRules {
         return instance;
     }
 
-    public boolean checkIfLegalMove(Player[] players, Draught draught, int oldX, int oldY, int newX, int newY){
+    public boolean checkIfLegalMove(Player[] players, Draught draught, Position moveToPos){
+        int oldX = draught.getX();
+        int oldY = draught.getY();
+        int newX = moveToPos.getX();
+        int newY = moveToPos.getY();
+
         if(!checkBounds(newX, newY)){
             return false;
         }

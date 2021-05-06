@@ -22,7 +22,7 @@ public class MovementTester extends TestCase {
         Draught draught = players[0].getDraught(4, 3);
 
         //act
-        boolean movementResult = gameRules.checkIfLegalMove(players, draught, 4, 3, 3, 4);
+        boolean movementResult = gameRules.checkIfLegalMove(players, draught, new Position(3,4));
 
         //assert
         assertFalse(movementResult);
@@ -34,7 +34,7 @@ public class MovementTester extends TestCase {
         Draught draught = players[0].getDraught(8, 1);
 
         //act
-        boolean movementResult = gameRules.checkIfLegalMove(players, draught, 8, 1, 7, 2);
+        boolean movementResult = gameRules.checkIfLegalMove(players, draught, new Position(7,2));
 
         //assert
         assertTrue(movementResult);
@@ -46,7 +46,7 @@ public class MovementTester extends TestCase {
         Draught draught = players[0].getDraught(1, 8);
 
         //act
-        boolean movementResult = gameRules.checkIfLegalMove(players, draught, 1, 8, 0, 9);
+        boolean movementResult = gameRules.checkIfLegalMove(players, draught, new Position(0, 9));
 
         //assert
         assertFalse(movementResult);
@@ -58,7 +58,7 @@ public class MovementTester extends TestCase {
         Draught draught = players[0].getDraught(1, 8);
 
         //act
-        boolean movementResult = gameRules.checkIfLegalMove(players, draught, 1, 8, 2, 8);
+        boolean movementResult = gameRules.checkIfLegalMove(players, draught, new Position(2, 8));
 
         //assert
         assertFalse(movementResult);
@@ -71,7 +71,7 @@ public class MovementTester extends TestCase {
         draught.setDame();
 
         //act
-        boolean movementResult = gameRules.checkIfLegalMove(players, draught, 4, 5, 7, 2);
+        boolean movementResult = gameRules.checkIfLegalMove(players, draught, new Position(7, 2));
 
         //assert
         assertTrue(movementResult);
